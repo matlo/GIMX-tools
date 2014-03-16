@@ -39,7 +39,18 @@ do
 	sleep 1
 done
 
-echo "The bluetooth dongle address is: $DONGLE_ADDRESS."
+HCI=$(hciconfig | grep -B 1 $DONGLE_ADDRESS | head -n 1 | cut -f 1 -d ':')
+
+if [ "$HCI" == "" ]
+then
+	echo Dongle not found!
+	exit
+fi
+
+HCI_NUMBER=$(echo $HCI | sed 's/hci//')
+
+echo "The bluetooth dongle address is $DONGLE_ADDRESS."
+echo "The bluetooth hci number is $HCI_NUMBER."
 
 #generate a link key for the DS4
 DS4_LINK_KEY=$(date | md5sum | cut -f 1 -d ' ')
@@ -64,7 +75,7 @@ do
 	sleep 1
 done
 
-echo "The DS4 address is $DS4_ADDRESS"
+echo "The DS4 address is $DS4_ADDRESS."
 
 #set the DS4 master
 ds4tool -m $DONGLE_ADDRESS -l $DS4_LINK_KEY 2&> /dev/null
@@ -165,7 +176,7 @@ then
 	exit
 fi
 
-echo "The PS4 address is $PS4_ADDRESS"
+echo "The PS4 address is $PS4_ADDRESS."
 
 echo "Everything was successful: setting dongle link keys."
 
@@ -179,14 +190,6 @@ echo $DS4_ADDRESS $DS4_LINK_KEY 4 0 >> /var/lib/bluetooth/$DONGLE_ADDRESS/linkke
 sed "/$PS4_ADDRESS/d" -i /var/lib/bluetooth/$DONGLE_ADDRESS/linkkeys 2> /dev/null
 echo $PS4_ADDRESS $PS4_LINK_KEY 4 0 >> /var/lib/bluetooth/$DONGLE_ADDRESS/linkkeys
 
-HCI=$(hciconfig | grep -B 1 $DONGLE_ADDRESS | head -n 1 | cut -f 1 -d ':')
-
-if [ "$HCI" == "" ]
-then
-	echo Dongle not found!
-	exit
-fi
-
 #stop the bluetooth service
 service bluetooth stop 2&> /dev/null
 
@@ -197,7 +200,5 @@ hciconfig hci1 putkey $DS4_ADDRESS
 hciconfig hci1 putkey $PS4_ADDRESS
 hciconfig hci1 auth encrypt
 
-HCI_NUMBER=$(echo $HCI | sed 's/hci//')
-
 echo "To run gimx, type:"
-echo "gimx -t DS4 -c config.xml --nograb -r 10 -h $HCI_NUMBER -b $PS4_ADDRESS"
+echo "gimx -t DS4 -c config.xml -h $HCI_NUMBER -b $PS4_ADDRESS"
