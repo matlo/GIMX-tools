@@ -197,8 +197,11 @@ service bluetooth stop 2&> /dev/null
 #make sure the bluetooth dongle is up
 hciconfig $HCI up pscan
 
+#send link keys
 hciconfig $HCI putkey $DS4_ADDRESS
 hciconfig $HCI putkey $PS4_ADDRESS
+
+#enable authentication and encryption
 hciconfig $HCI auth encrypt
 
 echo "To run gimx, type:"
