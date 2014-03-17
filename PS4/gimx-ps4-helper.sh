@@ -83,6 +83,7 @@ ds4tool -m $DONGLE_ADDRESS -l $DS4_LINK_KEY 2&> /dev/null
 if [ $? -eq 255 ]
 then
 	echo "Failed to set DS4 master!" 1>&2
+	exit
 fi
 
 echo "Unplug the DS4."
