@@ -196,9 +196,9 @@ service bluetooth stop 2&> /dev/null
 #make sure the bluetooth dongle is up
 hciconfig $HCI up pscan
 
-hciconfig hci1 putkey $DS4_ADDRESS
-hciconfig hci1 putkey $PS4_ADDRESS
-hciconfig hci1 auth encrypt
+hciconfig $HCI putkey $DS4_ADDRESS
+hciconfig $HCI putkey $PS4_ADDRESS
+hciconfig $HCI auth encrypt
 
 echo "To run gimx, type:"
 echo "gimx -t DS4 -c config.xml -h $HCI_NUMBER -b $PS4_ADDRESS"
