@@ -1,0 +1,46 @@
+
+_realname=pdcurses
+_mingw_suff=mingw-w64-${CARCH}
+pkgname="${_mingw_suff}-${_realname}"
+pkgver=3.4.0
+pkgrel=1
+pkgdesc="A public domain curses library for DOS, OS/2, Win32, X11 and SDL, implementing most of the functions available in X/Open and System V R4 curses."
+arch=('any')
+url="http://pdcurses.sourceforge.net"
+license=("Public domain")
+makedepends=("${_mingw_suff}-gcc")
+depends=("${_mingw_suff}-gcc-libs")
+options=('staticlibs' 'strip')
+source=("http://sourceforge.net/projects/pdcurses/files/pdcurses/3.4/PDCurses-3.4.tar.gz")
+md5sums=('4e04e4412d1b1392a7f9a489b95b331a')
+
+prepare() {
+  cd "${srcdir}/PDCurses-3.4/win32"
+  sed -i 's/\\exp/\/exp/g' mingwin32.mak
+  sed -i 's/del/rm -f/g' mingwin32.mak
+  sed -i 's/type/cat/g' mingwin32.mak
+  sed -i 's/copy/cp/g' mingwin32.mak
+}
+
+
+build() {
+  cd "${srcdir}/PDCurses-3.4/win32"
+  make -f mingwin32.mak DLL=Y clean
+  make -f mingwin32.mak DLL=Y WIDE=Y UTF8=Y pdcurses.dll
+  cp pdcurses.dll pdcursesu.dll
+  make -f mingwin32.mak DLL=Y clean
+  make -f mingwin32.mak DLL=Y WIDE=Y pdcurses.dll
+  cp pdcurses.dll pdcursesw.dll
+  make -f mingwin32.mak DLL=Y clean
+  make -f mingwin32.mak DLL=Y pdcurses.dll
+}
+
+package() {
+  cd "${srcdir}/PDCurses-3.4/win32"
+  mkdir -p "${pkgdir}/${MINGW_PREFIX}"/{include,bin}
+  ls "${pkgdir}/${MINGW_PREFIX}"
+  install -m 0644 ../curses.h "${pkgdir}/${MINGW_PREFIX}"/include/
+  install -m 0644 pdcurses.dll "${pkgdir}/${MINGW_PREFIX}"/bin/libpdcurses.dll
+  install -m 0644 pdcursesw.dll "${pkgdir}/${MINGW_PREFIX}"/bin/libpdcursesw.dll
+  install -m 0644 pdcursesu.dll "${pkgdir}/${MINGW_PREFIX}"/bin/libpdcursesu.dll
+}
