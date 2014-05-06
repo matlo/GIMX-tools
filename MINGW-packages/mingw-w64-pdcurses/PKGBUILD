@@ -1,3 +1,4 @@
+# Usage example: makepkg MINGW_PREFIX=/mingw64
 
 _realname=pdcurses
 _mingw_suff=mingw-w64-${CARCH}
