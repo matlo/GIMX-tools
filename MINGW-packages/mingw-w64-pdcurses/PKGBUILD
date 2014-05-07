@@ -1,4 +1,4 @@
-# Usage example: makepkg MINGW_PREFIX=/mingw64
+# Usage example: makepkg MINGW_PREFIX=/mingw64 CARCH=x86_64
 
 _realname=pdcurses
 _mingw_suff=mingw-w64-${CARCH}
@@ -38,10 +38,11 @@ build() {
 
 package() {
   cd "${srcdir}/PDCurses-3.4/win32"
-  mkdir -p "${pkgdir}/${MINGW_PREFIX}"/{include,bin}
+  mkdir -p "${pkgdir}/${MINGW_PREFIX}"/{include,bin,lib}
   ls "${pkgdir}/${MINGW_PREFIX}"
   install -m 0644 ../curses.h "${pkgdir}/${MINGW_PREFIX}"/include/
   install -m 0644 pdcurses.dll "${pkgdir}/${MINGW_PREFIX}"/bin/libpdcurses.dll
   install -m 0644 pdcursesw.dll "${pkgdir}/${MINGW_PREFIX}"/bin/libpdcursesw.dll
   install -m 0644 pdcursesu.dll "${pkgdir}/${MINGW_PREFIX}"/bin/libpdcursesu.dll
+  install -m 0644 pdcurses.a "${pkgdir}/${MINGW_PREFIX}"/lib/libpdcurses.dll.a
 }
