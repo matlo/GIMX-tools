@@ -1,4 +1,5 @@
-# Usage example: makepkg MINGW_PREFIX=/mingw64 MINGW_CHOST=x86_64-w64-mingw32 CARCH=x86_64
+# Usage examples: makepkg MINGW_PREFIX=/mingw64 MINGW_CHOST=x86_64-w64-mingw32 CARCH=x86_64
+#                 makepkg MINGW_PREFIX=/mingw32 MINGW_CHOST=i686-w64-mingw32 CARCH=i686
 
 _realname=wxMSW
 _mingw_suff=mingw-w64-${CARCH}
@@ -24,6 +25,7 @@ prepare() {
   then
     sed -i 's/--define __WIN32__ --define __WIN95__ --define __GNUWIN32__/--define WX_CPU_AMD64/g' configure
   fi
+  sed -i 's/$(LN_S) $(libdir)/$(LN_S) $(DESTDIR)$(libdir)/g' Makefile.in
 }
 
 build() {
