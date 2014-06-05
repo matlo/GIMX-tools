@@ -1,0 +1,27 @@
+# Usage examples: makepkg MINGW_PREFIX=/mingw32 CARCH=i686
+#                 makepkg MINGW_PREFIX=/mingw64 CARCH=x86_64
+# This script repackages the binaries from the libusb project.
+
+_realname=libusb
+_mingw_suff=mingw-w64-${CARCH}
+pkgname="${_mingw_suff}-${_realname}"
+pkgver=1.0.18
+pkgrel=1
+pkgdesc="A C library that provides generic access to USB devices. It is intended to be used by developers to facilitate the production of applications that communicate with USB hardware."
+arch=('any')
+url="http://libusb.info/"
+license=("LGPL 2.1")
+makedepends=( )
+depends=( )
+options=('staticlibs' 'strip')
+source=("http://sourceforge.net/projects/libusb/files/libusb-1.0/libusb-1.0.18/libusb-1.0.18-win.7z")
+sha1sums=('20a928ddfd1eb34ff75d243ca8b4ee39c31c12be')
+
+package() {
+  cd ${srcdir}/
+  mkdir -p "${pkgdir}/${MINGW_PREFIX}"/{include/libusb-1.0,bin,lib}
+  install -m 0644 include/libusb-1.0/* "${pkgdir}/${MINGW_PREFIX}"/include/libusb-1.0/
+  cp .${MINGW_PREFIX}/static/libusb-1.0.a "${pkgdir}/${MINGW_PREFIX}"/lib/
+  cp .${MINGW_PREFIX}/dll/libusb-1.0.dll.a "${pkgdir}/${MINGW_PREFIX}"/lib/
+  cp .${MINGW_PREFIX}/dll/libusb-1.0.dll "${pkgdir}/${MINGW_PREFIX}"/bin/
+}

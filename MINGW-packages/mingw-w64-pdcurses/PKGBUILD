@@ -1,4 +1,4 @@
-# Usage example: makepkg MINGW_PREFIX=/mingw64
+# Usage example: makepkg MINGW_PREFIX=/mingw64 CARCH=x86_64
 
 _realname=pdcurses
 _mingw_suff=mingw-w64-${CARCH}
@@ -26,22 +26,29 @@ prepare() {
 
 build() {
   cd "${srcdir}/PDCurses-3.4/win32"
+  mkdir {bin,lib}
+
   make -f mingwin32.mak DLL=Y clean
   make -f mingwin32.mak DLL=Y WIDE=Y UTF8=Y pdcurses.dll
-  cp pdcurses.dll pdcursesu.dll
+  cp pdcurses.dll bin/libpdcursesu.dll
+  cp pdcurses.a lib/libpdcursesu.dll.a
+
   make -f mingwin32.mak DLL=Y clean
   make -f mingwin32.mak DLL=Y WIDE=Y pdcurses.dll
-  cp pdcurses.dll pdcursesw.dll
+  cp pdcurses.dll bin/libpdcursesw.dll
+  cp pdcurses.a lib/libpdcursesw.dll.a
+
   make -f mingwin32.mak DLL=Y clean
   make -f mingwin32.mak DLL=Y pdcurses.dll
+  cp pdcurses.dll bin/libpdcurses.dll
+  cp pdcurses.a lib/libpdcurses.dll.a
 }
 
 package() {
   cd "${srcdir}/PDCurses-3.4/win32"
-  mkdir -p "${pkgdir}/${MINGW_PREFIX}"/{include,bin}
+  mkdir -p "${pkgdir}/${MINGW_PREFIX}"/{include,bin,lib}
   ls "${pkgdir}/${MINGW_PREFIX}"
   install -m 0644 ../curses.h "${pkgdir}/${MINGW_PREFIX}"/include/
-  install -m 0644 pdcurses.dll "${pkgdir}/${MINGW_PREFIX}"/bin/libpdcurses.dll
-  install -m 0644 pdcursesw.dll "${pkgdir}/${MINGW_PREFIX}"/bin/libpdcursesw.dll
-  install -m 0644 pdcursesu.dll "${pkgdir}/${MINGW_PREFIX}"/bin/libpdcursesu.dll
+  install -m 0644 bin/* "${pkgdir}/${MINGW_PREFIX}"/bin/
+  install -m 0644 lib/* "${pkgdir}/${MINGW_PREFIX}"/lib/
 }
