@@ -7,10 +7,7 @@ fi
 
 containsElement () { local e; for e in "${@:2}"; do [[ "$e" = "$1" ]] && return 0; done; return 1; }
 
-echo "Unplug any Dualshock 4."
-echo "Unplug any teensy."
-echo "Unpug the bluetooth dongle."
-echo "Then press enter."
+echo "Unplug the bluetooth dongle, then press enter."
 
 read
 
@@ -57,20 +54,15 @@ DS4_LINK_KEY=$(date | md5sum | cut -f 1 -d ' ')
 
 echo "Plug the DS4 with a USB cable."
 
-DS4_ADDRESS=""
-
 #wait for a DS4 to appear
-while [ "$DS4_ADDRESS" == "" ]
+while true
 do
-	TEENSY_ADDRESS=$(ds4tool 2> /dev/null | grep -B 2 "Current link key" | grep "Current Bluetooth Device Address" | cut -f 5 -d ' ')
-	
-	if [ "$TEENSY_ADDRESS" != "" ]
-	then
-		echo "The teensy should have been unplugged!"
-		exit
-	fi
-	
 	DS4_ADDRESS=$(ds4tool 2> /dev/null | grep "Current Bluetooth Device Address" | cut -f 5 -d ' ')
+	
+	if [ "$DS4_ADDRESS" != "" ]
+	then
+		break
+	fi
 	
 	sleep 1
 done
@@ -87,8 +79,6 @@ then
 fi
 
 echo "Unplug the DS4."
-
-TEST_ADDRESS=""
 
 #wait for the DS4 to disappear
 while true
@@ -108,7 +98,7 @@ echo "Plug the teensy."
 #wait for a teensy to appear
 while true
 do
-	TEENSY_ADDRESS=$(ds4tool 2> /dev/null | grep -B 2 "Current link key" | grep "Current Bluetooth Device Address" | cut -f 5 -d ' ')
+	TEENSY_ADDRESS=$(ds4tool -t 2> /dev/null | grep "Current Bluetooth Device Address" | cut -f 5 -d ' ')
 	
 	if [ "$TEENSY_ADDRESS" != "" ]
 	then
@@ -118,30 +108,20 @@ do
 	sleep 1
 done
 
-ds4tool -s $DONGLE_ADDRESS 2&> /dev/null
+ds4tool -t -s $DONGLE_ADDRESS -m 00:00:00:00:00:00 2&> /dev/null
 
 if [ $? -eq 255 ]
 then
-	echo "Failed to set teensy slave address!" 1>&2
-	exit
-fi
-
-ds4tool -m 00:00:00:00:00:00 2&> /dev/null
-
-if [ $? -eq 255 ]
-then
-	echo "Failed to set teensy master address!" 1>&2
+	echo "Failed to set teensy addresses!" 1>&2
 	exit
 fi
 
 echo "Unplug the teensy."
 
-TEST_ADDRESS=""
-
-#wait for the DS4 to disappear
+#wait for the Teensy to disappear
 while true
 do
-	TEST_ADDRESS=$(ds4tool 2> /dev/null | grep "Current Bluetooth Device Address" | cut -f 5 -d ' ')
+	TEST_ADDRESS=$(ds4tool -t 2> /dev/null | grep "Current Bluetooth Device Address" | cut -f 5 -d ' ')
 	
 	if [ "$TEST_ADDRESS" == "" ]
 	then
@@ -160,8 +140,8 @@ echo "Then plug the teensy back to the PC."
 #wait for a link key
 while true
 do
-	PS4_LINK_KEY=$(ds4tool 2> /dev/null | grep "Current link key" | cut -f 4 -d ' ')
-	PS4_ADDRESS=$(ds4tool 2> /dev/null | grep "Current Bluetooth master" | cut -f 4 -d ' ')
+	PS4_LINK_KEY=$(ds4tool -t 2> /dev/null | grep "Current link key" | cut -f 4 -d ' ')
+	PS4_ADDRESS=$(ds4tool -t 2> /dev/null | grep "Current Bluetooth master" | cut -f 4 -d ' ')
 	
 	if [ "$PS4_LINK_KEY" != "" ] && [ "$PS4_LINK_KEY" != "00000000000000000000000000000000" ]
 	then
