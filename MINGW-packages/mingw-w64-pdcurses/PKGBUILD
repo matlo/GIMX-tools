@@ -58,6 +58,6 @@ package() {
   mkdir -p "${pkgdir}/${MINGW_PREFIX}"/{include,bin,lib}
   for folder in {include,bin,lib}
   do
-    install -D -m 0644 $folder/* "${pkgdir}/${MINGW_PREFIX}"/$folder/
+    install -m 0644 $folder/* "${pkgdir}/${MINGW_PREFIX}"/$folder/
   done
 }
