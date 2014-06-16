@@ -171,6 +171,11 @@ echo $DS4_ADDRESS $DS4_LINK_KEY 4 0 >> /var/lib/bluetooth/$DONGLE_ADDRESS/linkke
 sed "/$PS4_ADDRESS/d" -i /var/lib/bluetooth/$DONGLE_ADDRESS/linkkeys 2> /dev/null
 echo $PS4_ADDRESS $PS4_LINK_KEY 4 0 >> /var/lib/bluetooth/$DONGLE_ADDRESS/linkkeys
 
+#restart the bluetooth service (loads link keys)
+service bluetooth restart 2&> /dev/null
+
+sleep 5
+
 #stop the bluetooth service
 service bluetooth stop 2&> /dev/null
 
