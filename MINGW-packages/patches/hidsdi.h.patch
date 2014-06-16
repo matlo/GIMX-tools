@@ -1,0 +1,12 @@
+--- /c/msys2/msys32/mingw32/i686-w64-mingw32/include/hidsdi.h	2014-04-25 13:21:43.000000000 +0200
++++ hidsdi.h	2014-06-07 13:19:21.828701700 +0200
+@@ -51,6 +51,9 @@
+ /* http://msdn.microsoft.com/en-us/library/windows/hardware/ff539675(v=vs.85).aspx */
+ HIDAPI BOOLEAN NTAPI HidD_GetNumInputBuffers (HANDLE HidDeviceObject, PULONG NumberBuffers);
+ 
++HIDAPI BOOLEAN NTAPI HidD_GetPreparsedData(HANDLE, PHIDP_PREPARSED_DATA *);
++HIDAPI BOOLEAN NTAPI HidD_FreePreparsedData(PHIDP_PREPARSED_DATA);
++
+ #ifdef __cplusplus
+ }
+ #endif

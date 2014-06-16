@@ -1,0 +1,12 @@
+--- /c/msys2/msys32/mingw32/i686-w64-mingw32/include/ddk/hidclass.h	2014-04-25 13:21:42.000000000 +0200
++++ hidclass.h	2014-06-07 13:19:11.405243400 +0200
+@@ -120,6 +120,9 @@
+   ULONG  RingBufferSize;
+ } HID_DRIVER_CONFIG, *PHID_DRIVER_CONFIG;
+ 
++typedef VOID (*PINTERFACE_REFERENCE)(PVOID Context);
++typedef VOID (*PINTERFACE_DEREFERENCE)(PVOID Context);
++
+ typedef struct _HID_INTERFACE_HIDPARSE {
+ #ifdef __cplusplus
+   INTERFACE  i;

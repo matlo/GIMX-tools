@@ -14,7 +14,7 @@ license=("LGPL 2.1")
 makedepends=( )
 depends=( )
 options=('staticlibs' 'strip')
-source=("http://sourceforge.net/projects/libusb/files/libusb-1.0/libusb-1.0.18/libusb-1.0.18-win.7z")
+source=("http://sourceforge.net/projects/libusb/files/libusb-1.0/libusb-${pkgver}/libusb-${pkgver}-win.7z")
 sha1sums=('20a928ddfd1eb34ff75d243ca8b4ee39c31c12be')
 
 package() {

@@ -1,4 +1,5 @@
-# Usage example: makepkg MINGW_PREFIX=/mingw64 CARCH=x86_64
+# Usage examples: makepkg MINGW_PREFIX=/mingw64 CARCH=x86_64
+#                 makepkg MINGW_PREFIX=/mingw32 CARCH=i686
 
 _realname=pdcurses
 _mingw_suff=mingw-w64-${CARCH}
@@ -17,38 +18,46 @@ md5sums=('4e04e4412d1b1392a7f9a489b95b331a')
 
 prepare() {
   cd "${srcdir}/PDCurses-3.4/win32"
-  sed -i 's/\\exp/\/exp/g' mingwin32.mak
-  sed -i 's/del/rm -f/g' mingwin32.mak
-  sed -i 's/type/cat/g' mingwin32.mak
-  sed -i 's/copy/cp/g' mingwin32.mak
+  patch -p0 < ../../../mingwin32.mak.patch
 }
 
 
 build() {
   cd "${srcdir}/PDCurses-3.4/win32"
-  mkdir {bin,lib}
+  
+  rm -rf {include,bin,lib}
+  mkdir -p {include,bin,lib}
 
-  make -f mingwin32.mak DLL=Y clean
-  make -f mingwin32.mak DLL=Y WIDE=Y UTF8=Y pdcurses.dll
-  cp pdcurses.dll bin/libpdcursesu.dll
-  cp pdcurses.a lib/libpdcursesu.dll.a
+  make -f mingwin32.mak clean
+  make -f mingwin32.mak DLL=Y WIDE=Y UTF8=Y libpdcursesu.dll
+  
+  cp ../curses.h include/cursesu.h
+  patch -d include < ../../../cursesu.h.patch
+  cp libpdcursesu.dll bin/
+  cp libpdcursesu.dll.a lib/
 
-  make -f mingwin32.mak DLL=Y clean
-  make -f mingwin32.mak DLL=Y WIDE=Y pdcurses.dll
-  cp pdcurses.dll bin/libpdcursesw.dll
-  cp pdcurses.a lib/libpdcursesw.dll.a
+  make -f mingwin32.mak clean
+  make -f mingwin32.mak DLL=Y WIDE=Y libpdcursesw.dll
+  
+  cp ../curses.h include/cursesw.h
+  patch -d include < ../../../cursesw.h.patch
+  cp libpdcursesw.dll bin/
+  cp libpdcursesw.dll.a lib/
 
-  make -f mingwin32.mak DLL=Y clean
-  make -f mingwin32.mak DLL=Y pdcurses.dll
-  cp pdcurses.dll bin/libpdcurses.dll
-  cp pdcurses.a lib/libpdcurses.dll.a
+  make -f mingwin32.mak clean
+  make -f mingwin32.mak DLL=Y libpdcurses.dll
+  
+  cp ../curses.h include/curses.h
+  patch -d include < ../../../curses.h.patch
+  cp libpdcurses.dll bin/
+  cp libpdcurses.dll.a lib/
 }
 
 package() {
   cd "${srcdir}/PDCurses-3.4/win32"
   mkdir -p "${pkgdir}/${MINGW_PREFIX}"/{include,bin,lib}
-  ls "${pkgdir}/${MINGW_PREFIX}"
-  install -m 0644 ../curses.h "${pkgdir}/${MINGW_PREFIX}"/include/
-  install -m 0644 bin/* "${pkgdir}/${MINGW_PREFIX}"/bin/
-  install -m 0644 lib/* "${pkgdir}/${MINGW_PREFIX}"/lib/
+  for folder in {include,bin,lib}
+  do
+    install -m 0644 $folder/* "${pkgdir}/${MINGW_PREFIX}"/$folder/
+  done
 }
