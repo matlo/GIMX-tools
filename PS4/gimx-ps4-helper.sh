@@ -108,7 +108,8 @@ do
 	sleep 1
 done
 
-ds4tool -t -s $DONGLE_ADDRESS -m 00:00:00:00:00:00 2&> /dev/null
+ds4tool -t -s $DONGLE_ADDRESS 2&> /dev/null
+ds4tool -t -m 00:00:00:00:00:00 2&> /dev/null
 
 if [ $? -eq 255 ]
 then
