@@ -162,33 +162,15 @@ echo "The PS4 address is $PS4_ADDRESS."
 
 echo "Everything was successful: setting dongle link keys."
 
-mkdir -p /var/lib/bluetooth/$DONGLE_ADDRESS
+LK_DIR=~/.gimx/bluetooth/"$DONGLE_ADDRESS"
+
+mkdir -p $LK_DIR
 
 #set dongle link key for the DS4
-sed "/$DS4_ADDRESS/d" -i /var/lib/bluetooth/$DONGLE_ADDRESS/linkkeys 2> /dev/null
-echo $DS4_ADDRESS $DS4_LINK_KEY 4 0 >> /var/lib/bluetooth/$DONGLE_ADDRESS/linkkeys
+echo $DS4_ADDRESS $DS4_LINK_KEY 4 0 > $LK_DIR/linkkeys
 
 #set dongle link key for the PS4
-sed "/$PS4_ADDRESS/d" -i /var/lib/bluetooth/$DONGLE_ADDRESS/linkkeys 2> /dev/null
-echo $PS4_ADDRESS $PS4_LINK_KEY 4 0 >> /var/lib/bluetooth/$DONGLE_ADDRESS/linkkeys
-
-#restart the bluetooth service (loads link keys)
-service bluetooth restart 2&> /dev/null
-
-sleep 5
-
-#stop the bluetooth service
-service bluetooth stop 2&> /dev/null
-
-#make sure the bluetooth dongle is up
-hciconfig $HCI up pscan
-
-#send link keys
-hciconfig $HCI putkey $DS4_ADDRESS
-hciconfig $HCI putkey $PS4_ADDRESS
-
-#enable authentication and encryption
-hciconfig $HCI auth encrypt
+echo $PS4_ADDRESS $PS4_LINK_KEY 4 0 >> $LK_DIR/linkkeys
 
 echo "To run gimx, type:"
 echo "gimx -t DS4 -c config.xml -h $HCI_NUMBER -b $PS4_ADDRESS"
