@@ -29,10 +29,6 @@
 #define VENDOR 0x054c
 #define PRODUCT 0x05c4
 
-#define CTRL_IN     (LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_ENDPOINT_IN)
-#define CTRL_OUT    (LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_ENDPOINT_OUT)
-
-#define SETUP_LENGTH 0x08
 #define MAX_DATA_LENGTH 0x40
 
 #define CHALLENGES_NB 0x05
@@ -81,11 +77,9 @@ void dump(unsigned char* buf, int len)
 
 void callback(struct libusb_transfer *transfer)
 {
-  printf("callback %ld\n", (unsigned long)transfer->user_data);
-
   struct timeval t;
   gettimeofday(&t, NULL);
-  printf("%ld.%06ld callback\n", t.tv_sec, t.tv_usec);
+  printf("%ld.%06ld ", t.tv_sec, t.tv_usec);
 
   struct libusb_control_setup* setup = libusb_control_transfer_get_setup(transfer);
 
@@ -96,7 +90,7 @@ void callback(struct libusb_transfer *transfer)
     return;
   }
 
-  fprintf(stderr, "libusb_transfer: bmRequestType=0x%02x, bRequest=0x%02x, wValue=0x%04x\n", setup->bmRequestType, setup->bRequest, setup->wValue);
+  printf("libusb_transfer: bmRequestType=0x%02x, bRequest=0x%02x, wValue=0x%04x\n", setup->bmRequestType, setup->bRequest, setup->wValue);
 
   if(step == E_STEP_F0)
   {
@@ -111,7 +105,7 @@ void callback(struct libusb_transfer *transfer)
   {
     unsigned char *data = libusb_control_transfer_get_data(transfer);
     dump(data, transfer->actual_length);
-    if(transfer->buffer[SETUP_LENGTH+2] == 0x00)
+    if(data[2] == 0x00)
     {
       count = 0;
       step = E_STEP_F1;
@@ -136,15 +130,15 @@ void callback(struct libusb_transfer *transfer)
       send_next_transfer(transfer->dev_handle);
     }
   }
-
-  libusb_free_transfer(transfer);
 }
 
 int send_next_transfer(libusb_device_handle* devh)
 {
   struct libusb_transfer* transfer = libusb_alloc_transfer(0);
 
-  static unsigned char buffer[SETUP_LENGTH+MAX_DATA_LENGTH] = {};
+  transfer->flags = LIBUSB_TRANSFER_FREE_BUFFER | LIBUSB_TRANSFER_FREE_TRANSFER ;
+
+  unsigned char* buffer = malloc(LIBUSB_CONTROL_SETUP_SIZE+MAX_DATA_LENGTH);
 
   uint8_t bmRequestType;
   uint8_t bRequest;
@@ -159,7 +153,7 @@ int send_next_transfer(libusb_device_handle* devh)
       bRequest = LIBUSB_REQUEST_SET_CONFIGURATION;
       wValue |= 0xf0;
       wLength = 0x0040;
-      memcpy(buffer+SETUP_LENGTH, challenges[count], MAX_DATA_LENGTH);
+      memcpy(buffer+LIBUSB_CONTROL_SETUP_SIZE, challenges[count], MAX_DATA_LENGTH);
       break;
     case E_STEP_F2:
       bmRequestType = LIBUSB_ENDPOINT_IN | LIBUSB_REQUEST_TYPE_CLASS | LIBUSB_RECIPIENT_INTERFACE;
@@ -178,9 +172,10 @@ int send_next_transfer(libusb_device_handle* devh)
   libusb_fill_control_setup(buffer, bmRequestType, bRequest, wValue, wIndex, wLength);
   libusb_fill_control_transfer(transfer, devh, buffer, callback, (void*)42, 1000);
 
-  if(libusb_submit_transfer(transfer) < 0)
+  int ret = libusb_submit_transfer(transfer);
+  if(ret < 0)
   {
-    fprintf(stderr, "libusb_submit_transfer failed\n");
+    fprintf(stderr, "libusb_submit_transfer: %s.\n", libusb_strerror(ret));
     return -1;
   }
 
@@ -193,7 +188,7 @@ int send_next_transfer(libusb_device_handle* devh)
   return 0;
 }
 
-#define FD_NB 1
+#define MAX_FD 64
 
 int main(int argc, char *argv[])
 {
@@ -215,9 +210,10 @@ int main(int argc, char *argv[])
 
   (void) signal(SIGINT, terminate);
 
-  if(libusb_init(&ctx))
+  ret = libusb_init(&ctx);
+  if(ret < 0)
   {
-    fprintf(stderr, "Can't initialize libusb.\n");
+    fprintf(stderr, "libusb_init: %s.\n", libusb_strerror(ret));
     return -1;
   }
 
@@ -235,22 +231,17 @@ int main(int argc, char *argv[])
         ret = libusb_open(devs[i], &devh);
         if(!ret)
         {
-          if(libusb_detach_kernel_driver(devh, 0) < 0)
+          libusb_set_auto_detach_kernel_driver(devh, 1);
+
+          ret = libusb_claim_interface(devh, 0);
+          if(ret < 0)
           {
-            fprintf(stderr, "Can't detach kernel driver.\n");
+            fprintf(stderr, "Can't claim interface: %s.\n", libusb_strerror(ret));
             ret = -1;
           }
           else
           {
-            if(libusb_claim_interface(devh, 0) < 0)
-            {
-              fprintf(stderr, "Can't claim interface.\n");
-              ret = -1;
-            }
-            else
-            {
-              break;
-            }
+            break;
           }
         }
       }
@@ -267,15 +258,14 @@ int main(int argc, char *argv[])
 
   printf("device found\n");
 
-  struct libusb_pollfd** pfd_usb = libusb_get_pollfds(ctx);
+  const struct libusb_pollfd** pfd_usb = libusb_get_pollfds(ctx);
 
-  struct pollfd pfd[64] = {};
+  struct pollfd pfd[MAX_FD] = {};
 
   for (i=0; pfd_usb[i] != NULL; i++)
   {
     pfd[i].fd = pfd_usb[i]->fd;
     pfd[i].events = pfd_usb[i]->events;
-    printf("fd: %d events:0x%04x\n", pfd[i].fd, pfd[i].events);
   }
 
   int nbfd = i;
@@ -290,32 +280,17 @@ int main(int argc, char *argv[])
       {
         if (pfd[i].revents & (POLLERR | POLLHUP))
         {
-          printf("%d\n", pfd[i].fd);
           done = 1;
         }
         if(pfd[i].revents & (POLLOUT | POLLIN))
         {
-          printf("%d\n", pfd[i].fd);
           libusb_handle_events(ctx);
         }
       }
     }
   }
 
-  for(i=0; i<FD_NB; ++i)
-  {
-    close(pfd[i].fd);
-  }
-
-  if(libusb_release_interface(devh, 0))
-  {
-    fprintf(stderr, "Can't release interface.\n");
-  }
-
-  if(libusb_attach_kernel_driver(devh, 0) < 0)
-  {
-    fprintf(stderr, "Can't attach kernel driver.\n");
-  }
+  libusb_release_interface(devh, 0);
 
   libusb_close(devh);
 
