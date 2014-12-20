@@ -55,5 +55,5 @@
 #play effect
 0008 01 35 00 00 2d 2d 80 00 00 00 64 64 
 
-#stop effect after 2000ms
-07d0 01 35 00 00 2d 2d 00 00 00 00 64 64
+#stop effect after 5000ms
+1388 01 35 00 00 2d 2d 00 00 00 00 64 64
