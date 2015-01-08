@@ -90,7 +90,11 @@ int process_transfer(s_transfer* transfer)
   int res = 0;
 
   printf("sleep %d ms\n", transfer->delay_ms);
+#ifndef WIN32
   usleep(transfer->delay_ms*1000);
+#else
+  Sleep(transfer->delay_ms);
+#endif
 
   if (transfer->feature)
   {
