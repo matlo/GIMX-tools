@@ -1,0 +1,47 @@
+# build command: makepkg-mingw
+
+_realname=libusb-usbdk
+pkgname="${MINGW_PACKAGE_PREFIX}-${_realname}"
+pkgver=0.0.0
+pkgrel=1
+pkgdesc="Library that provides generic access to USB devices'. (mingw-w64)"
+arch=('any')
+url="http://libusb.info/"
+license=("LGPL")
+makedepends=("${MINGW_PACKAGE_PREFIX}-gcc")
+options=('staticlibs' 'strip')
+source=("https://github.com/dmitryfleytman/libusb/archive/usbdk-backend-v3.zip")
+md5sums=('c94d90b2aeac099e34d3b50bb818627f')
+
+prepare() {
+  cd "${srcdir}"
+  rm -rf "${_realname}-${pkgver}/"
+  mv "libusb-usbdk-backend-v3" "${_realname}-${pkgver}"
+  cd "${_realname}-${pkgver}"
+  ./bootstrap.sh
+}
+
+build() {
+  #export lt_cv_deplibs_check_method='pass_all'
+  mkdir -p "${srcdir}/build-${MINGW_CHOST}"
+  cd "${srcdir}/build-${MINGW_CHOST}"
+  "${srcdir}"/${_realname}-${pkgver}/configure \
+    --prefix=${MINGW_PREFIX} \
+    --build=${MINGW_CHOST} \
+    --host=${MINGW_CHOST} \
+    --enable-shared \
+    --enable-static \
+    --enable-usbdk
+
+  make
+}
+
+check() {
+  cd "${srcdir}/build-${MINGW_CHOST}"
+  make check
+}
+
+package() {
+  cd "${srcdir}/build-${MINGW_CHOST}"
+  make DESTDIR="$pkgdir" install
+}
