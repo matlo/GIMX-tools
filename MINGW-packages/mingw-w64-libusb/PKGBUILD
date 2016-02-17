@@ -10,13 +10,13 @@ url="http://libusb.info/"
 license=("LGPL")
 makedepends=("${MINGW_PACKAGE_PREFIX}-gcc")
 options=('staticlibs' 'strip')
-source=("https://github.com/dmitryfleytman/libusb/archive/usbdk-backend-v3.zip")
-md5sums=('c94d90b2aeac099e34d3b50bb818627f')
+source=("https://github.com/libusb/libusb/archive/448584afd1b012210e8e9038f888597588450d7a.zip")
+md5sums=('7c2fdea289cfe10952b11b76a0df3d2f')
 
 prepare() {
   cd "${srcdir}"
   rm -rf "${_realname}-${pkgver}/"
-  mv "libusb-usbdk-backend-v3" "${_realname}-${pkgver}"
+  mv "libusb-448584afd1b012210e8e9038f888597588450d7a" "${_realname}-${pkgver}"
   cd "${_realname}-${pkgver}"
   ./bootstrap.sh
 }
