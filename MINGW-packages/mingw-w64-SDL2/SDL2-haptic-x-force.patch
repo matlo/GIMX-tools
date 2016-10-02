@@ -1,0 +1,48 @@
+diff -uNr SDL2-2.0.4.orig/include/SDL_haptic.h SDL2-2.0.4.mod/include/SDL_haptic.h
+--- SDL2-2.0.4.orig/include/SDL_haptic.h	2016-01-02 20:56:31.000000000 +0100
++++ SDL2-2.0.4.mod/include/SDL_haptic.h	2016-10-02 19:51:46.501834000 +0200
+@@ -323,6 +323,13 @@
+  */
+ #define SDL_HAPTIC_SPHERICAL  2
+ 
++/**
++ *  \brief Uses X axis only.
++ *
++ *  \sa SDL_HapticDirection
++ */
++#define SDL_HAPTIC_X_FORCE  3
++
+ /* @} *//* Direction encodings */
+ 
+ /* @} *//* Haptic features */
+diff -uNr SDL2-2.0.4.orig/src/haptic/windows/SDL_dinputhaptic.c SDL2-2.0.4.mod/src/haptic/windows/SDL_dinputhaptic.c
+--- SDL2-2.0.4.orig/src/haptic/windows/SDL_dinputhaptic.c	2016-10-02 19:52:56.492256800 +0200
++++ SDL2-2.0.4.mod/src/haptic/windows/SDL_dinputhaptic.c	2016-10-02 19:51:24.195391900 +0200
+@@ -597,6 +597,10 @@
+         if (naxes > 2)
+             rglDir[2] = dir->dir[2];
+         return 0;
++    case SDL_HAPTIC_X_FORCE:
++        effect->dwFlags |= DIEFF_CARTESIAN;
++        rglDir[0] = 0;
++        return 0;
+ 
+     default:
+         return SDL_SetError("Haptic: Unknown direction type.");
+@@ -645,7 +649,15 @@
+     envelope->dwSize = sizeof(DIENVELOPE);      /* Always should be this. */
+ 
+     /* Axes. */
+-    dest->cAxes = haptic->naxes;
++    if (src->constant.direction.type == SDL_HAPTIC_X_FORCE) {
++        dest->cAxes = 1;
++        if (haptic->hwdata->axes[0] != DIJOFS_X) {
++            return SDL_SetError("Haptic: Axis X does not support FF effects.");
++        }
++    }
++    else {
++        dest->cAxes = haptic->naxes;
++    }
+     if (dest->cAxes > 0) {
+         axes = SDL_malloc(sizeof(DWORD) * dest->cAxes);
+         if (axes == NULL) {
