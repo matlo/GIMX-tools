@@ -1,0 +1,14 @@
+diff -uNr SDL2-2.0.4.orig/src/joystick/windows/SDL_dinputjoystick.c SDL2-2.0.4.mod/src/joystick/windows/SDL_dinputjoystick.c
+--- SDL2-2.0.4.orig/src/joystick/windows/SDL_dinputjoystick.c	2016-01-02 20:56:31.000000000 +0100
++++ SDL2-2.0.4.mod/src/joystick/windows/SDL_dinputjoystick.c	2017-01-17 21:30:23.075931900 +0100
+@@ -342,10 +342,6 @@
+     JoyStick_DeviceData *pPrevJoystick = NULL;
+     const DWORD devtype = (pdidInstance->dwDevType & 0xFF);
+ 
+-    if (devtype == DI8DEVTYPE_SUPPLEMENTAL) {
+-        return DIENUM_CONTINUE;  /* Ignore touchpads, etc. */
+-    }
+-
+     if (SDL_IsXInputDevice(&pdidInstance->guidProduct)) {
+         return DIENUM_CONTINUE;  /* ignore XInput devices here, keep going. */
+     }

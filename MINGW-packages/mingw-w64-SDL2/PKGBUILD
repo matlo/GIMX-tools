@@ -17,13 +17,15 @@ source=("https://libsdl.org/release/SDL2-${pkgver}.tar.gz"
         SDL2-fix-gcc-compatibility.patch
         SDL2-haptic.patch
         SDL2-haptic-x-force.patch
-        SDL2-haptic-acquire.patch)
+        SDL2-haptic-acquire.patch
+        SDL2-joystick.patch)
 sha256sums=('da55e540bf6331824153805d58b590a29c39d2d506c6d02fa409aedeab21174b'
             '3b873346ac0c2b159dd81d21fca9d52be71699f5e04d2867049f0db4a2f4edfc'
             '8b33198c272a2906c83e83957caf9f19ddac31422623f9e6caca0fc1e4ba416a'
             'c122247734e7fdb3fc5f6bcacc9d0c45f20e229ff3ad043971f04c140fe92851'
             '096934030ef02b1c3c722efc69788df7d3ed2b74ab6b9c6eec8fcac0073c7a38'
-            'cf783b4eeae5fae040a74cbe038602b5dfc10c371e549b1a079aec293c9a0370')
+            'cf783b4eeae5fae040a74cbe038602b5dfc10c371e549b1a079aec293c9a0370'
+            '7d61845af48246a441befd6243803c1bd34c557d2a8adb82cb967aa710d0f3ee')
 
 prepare() {
   cd "${srcdir}"/${_realname}-${pkgver}
@@ -32,6 +34,7 @@ prepare() {
   patch -p1 -i ${srcdir}/SDL2-haptic.patch
   patch -p1 -i ${srcdir}/SDL2-haptic-x-force.patch
   patch -p1 -i ${srcdir}/SDL2-haptic-acquire.patch
+  patch -p1 -i ${srcdir}/SDL2-joystick.patch
 
   ./autogen.sh
 }
