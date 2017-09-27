@@ -3,7 +3,7 @@
 _realname=SDL2
 pkgbase=mingw-w64-${_realname}
 pkgname="${MINGW_PACKAGE_PREFIX}-${_realname}"
-pkgver=2.0.4
+pkgver=2.0.6
 pkgrel=1
 pkgdesc="A library for portable low-level access to a video framebuffer, audio output, mouse, and keyboard (Version 2) (mingw-w64)"
 arch=('any')
@@ -13,30 +13,13 @@ makedepends=("${MINGW_PACKAGE_PREFIX}-gcc" "${MINGW_PACKAGE_PREFIX}-pkg-config")
 depends=("${MINGW_PACKAGE_PREFIX}-gcc-libs" "${MINGW_PACKAGE_PREFIX}-libiconv")
 options=('staticlibs' 'strip')
 source=("https://libsdl.org/release/SDL2-${pkgver}.tar.gz"
-        SDL2-prevent-duplicate-d3d11-declarations.patch
-        SDL2-fix-gcc-compatibility.patch
-        SDL2-haptic.patch
-        SDL2-haptic-first-axis.patch
-        SDL2-haptic-acquire.patch
-        SDL2-joystick.patch)
-sha256sums=('da55e540bf6331824153805d58b590a29c39d2d506c6d02fa409aedeab21174b'
-            '3b873346ac0c2b159dd81d21fca9d52be71699f5e04d2867049f0db4a2f4edfc'
-            '8b33198c272a2906c83e83957caf9f19ddac31422623f9e6caca0fc1e4ba416a'
-            'c122247734e7fdb3fc5f6bcacc9d0c45f20e229ff3ad043971f04c140fe92851'
-            '3b889082a73c9b43fdbb73a0839bb6a6780a75ff51ad69b5ea73c00164fb9806'
-            'cf783b4eeae5fae040a74cbe038602b5dfc10c371e549b1a079aec293c9a0370'
-            '7d61845af48246a441befd6243803c1bd34c557d2a8adb82cb967aa710d0f3ee')
+        SDL2-haptic-first-axis.patch)
+sha256sums=('03658b5660d16d7b31263a691e058ed37acdab155d68dabbad79998fb552c5df'
+            '3b889082a73c9b43fdbb73a0839bb6a6780a75ff51ad69b5ea73c00164fb9806')
 
 prepare() {
   cd "${srcdir}"/${_realname}-${pkgver}
-  patch -p1 -i ${srcdir}/SDL2-fix-gcc-compatibility.patch
-  patch -p1 -i ${srcdir}/SDL2-prevent-duplicate-d3d11-declarations.patch
-  patch -p1 -i ${srcdir}/SDL2-haptic.patch
   patch -p1 -i ${srcdir}/SDL2-haptic-first-axis.patch
-  patch -p1 -i ${srcdir}/SDL2-haptic-acquire.patch
-  patch -p1 -i ${srcdir}/SDL2-joystick.patch
-
-  ./autogen.sh
 }
 
 build() {
@@ -53,5 +36,4 @@ build() {
 package() {
   cd "${srcdir}/build-${MINGW_CHOST}"
   make DESTDIR="${pkgdir}" install
-  sed -e "s|-mwindows||g" -i ${pkgdir}${MINGW_PREFIX}/lib/pkgconfig/sdl2.pc
 }
