@@ -1,0 +1,26 @@
+diff -uNr SDL2-2.0.7.orig/src/joystick/windows/SDL_dinputjoystick.c SDL2-2.0.7.mod/src/joystick/windows/SDL_dinputjoystick.c
+--- SDL2-2.0.7.orig/src/joystick/windows/SDL_dinputjoystick.c	2017-10-23 21:27:46.000000000 +0200
++++ SDL2-2.0.7.mod/src/joystick/windows/SDL_dinputjoystick.c	2017-12-21 21:43:16.858906400 +0100
+@@ -285,7 +285,8 @@
+             return SDL_FALSE;
+         }
+ 
+-        if (GetRawInputDeviceList(SDL_RawDevList, &SDL_RawDevListCount, sizeof(RAWINPUTDEVICELIST)) == -1) {
++        SDL_RawDevListCount = GetRawInputDeviceList(SDL_RawDevList, &SDL_RawDevListCount, sizeof(RAWINPUTDEVICELIST));
++        if (SDL_RawDevListCount == -1) {
+             SDL_free(SDL_RawDevList);
+             SDL_RawDevList = NULL;
+             return SDL_FALSE;  /* oh well. */
+diff -uNr SDL2-2.0.7.orig/src/joystick/windows/SDL_xinputjoystick.c SDL2-2.0.7.mod/src/joystick/windows/SDL_xinputjoystick.c
+--- SDL2-2.0.7.orig/src/joystick/windows/SDL_xinputjoystick.c	2017-10-23 21:27:46.000000000 +0200
++++ SDL2-2.0.7.mod/src/joystick/windows/SDL_xinputjoystick.c	2017-12-21 21:44:25.256851400 +0100
+@@ -130,7 +130,8 @@
+         return;
+     }
+ 
+-    if (GetRawInputDeviceList(devices, &device_count, sizeof(RAWINPUTDEVICELIST)) == -1) {
++    device_count = GetRawInputDeviceList(devices, &device_count, sizeof(RAWINPUTDEVICELIST));
++    if (device_count == -1) {
+         SDL_free(devices);
+         return;  /* oh well. */
+     }
