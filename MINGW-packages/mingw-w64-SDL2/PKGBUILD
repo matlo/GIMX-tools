@@ -31,7 +31,8 @@ build() {
   ../${_realname}-${pkgver}/configure \
     --prefix=${MINGW_PREFIX} \
     --build=${MINGW_CHOST} \
-    --host=${MINGW_CHOST}
+    --host=${MINGW_CHOST} \
+    --disable-timers
 
   make
 }
