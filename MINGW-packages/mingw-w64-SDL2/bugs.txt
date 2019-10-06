@@ -1,2 +1,0 @@
-https://bugzilla.libsdl.org/show_bug.cgi?id=3446
-https://bugzilla.libsdl.org/show_bug.cgi?id=4006
